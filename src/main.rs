@@ -36,7 +36,7 @@ fn main() -> Result<()> {
     stream.play()?;
 
     //Output buffer (frequencies)
-    let ob = Arc::new(Mutex::new(Vec::new()));
+    let ob = Arc::new(Mutex::new([0.0; I_BUFF / 2]));
     let ob_clone = Arc::clone(&ob);
 
     //Setup output stream

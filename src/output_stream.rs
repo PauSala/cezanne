@@ -7,7 +7,7 @@ use crate::{analizer::frequencies, I_BUFF};
 
 pub fn init_output_stream(
     input_buffer: Arc<Mutex<Vec<f32>>>,
-    output_buffer: Arc<Mutex<Vec<f32>>>,
+    output_buffer: Arc<Mutex<[f32; I_BUFF / 2]>>,
     channels: u16,
 ) {
     thread::spawn(move || loop {
@@ -24,9 +24,10 @@ pub fn init_output_stream(
                 let ff = frequencies(&buffer, channels);
                 let lock = output_buffer.lock();
                 match lock {
-                    Ok(mut buffer) => {
-                        buffer.clear();
-                        buffer.extend_from_slice(&ff);
+                    Ok(mut output_buffer) => {
+                        for i in 0..output_buffer.len() {
+                            output_buffer[i] = ff[i];
+                        }
                     }
                     Err(e) => {
                         panic!("{}", e)

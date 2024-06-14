@@ -1,6 +1,6 @@
 use std::sync::{Arc, Mutex};
 
-use crate::{FF_BUFF, MARGIN, SCALE_FACTOR};
+use crate::{FF_BUFF, I_BUFF, MARGIN, SCALE_FACTOR};
 const AA_SQRT: usize = 4;
 const AA_PIXEL_SIZE: usize = AA_SQRT.pow(2);
 
@@ -64,7 +64,7 @@ impl Visualizer {
         prev_buffer: &mut Vec<f32>,
         window_buffer: &mut Vec<u32>,
         scaled_buffer: &mut Vec<u32>,
-        freqs: Arc<Mutex<Vec<f32>>>,
+        freqs: Arc<Mutex<[f32; I_BUFF / 2]>>,
         elapsed_milis: f64,
     ) -> Option<()> {
         let ff = freqs.lock().unwrap();
