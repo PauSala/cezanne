@@ -61,17 +61,12 @@ pub fn run() -> Result<()> {
     while window.is_open() && !window.is_key_down(Key::Escape) {
         let end = SystemTime::now();
         let elapsed = end.duration_since(start).unwrap();
-        // println!("Elapsed top: {:?}ms", elapsed.as_millis());
         // precission issues
         let millis = elapsed.as_nanos() as f64 / 1_000_000.0;
 
         //Get visualiation buffer
         let ob_clone = Arc::clone(&ob);
-        // let xstart = SystemTime::now();
         let b = visualizer.update_window_buffer(&mut db, &mut wb, &mut scaled_b, ob_clone, millis);
-        // let xend = SystemTime::now();
-        // let elapsed = xend.duration_since(xstart).unwrap();
-        // println!("Elapsed: {:?}ms", elapsed.as_nanos() as f64 / 1_000_000.0);
         if let Some(_) = b {
             window.update_with_buffer(&wb, WIDTH, HEIGHT).unwrap();
         }
