@@ -1,5 +1,5 @@
 use anyhow::Result;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Condvar, Mutex};
 
 use cpal::{
     traits::{HostTrait, StreamTrait},
@@ -25,7 +25,7 @@ pub struct AudioInput {
 
 impl AudioInput {
     pub fn new(
-        shared_buffer: Arc<Mutex<Vec<f32>>>,
+        shared_buffer: Arc<(Mutex<Vec<f32>>, Condvar)>,
         device: Device,
         config: &SupportedStreamConfig,
     ) -> Result<Self> {
@@ -39,11 +39,13 @@ impl AudioInput {
         let stream = match sample_format {
             SampleFormat::F32 => {
                 let callback = move |data: &[f32], _: &InputCallbackInfo| {
-                    let mut buffer = shared_buffer_clone.lock().unwrap();
+                    let (lock, cvar) = &*shared_buffer_clone;
+                    let mut buffer = lock.lock().unwrap();
                     if buffer.len() >= I_BUFF {
                         buffer.clear();
                     }
                     buffer.extend_from_slice(data);
+                    cvar.notify_one();
                 };
                 device.build_input_stream(&config, callback, err_fn, None)?
             }
