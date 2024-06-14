@@ -16,7 +16,7 @@ pub mod output_stream;
 pub mod visualizer;
 
 const MARGIN: usize = 8;
-const WIDTH: usize = 1024 + 2 * MARGIN;
+const WIDTH: usize = 512 + 2 * MARGIN;
 const HEIGHT: usize = WIDTH;
 const DELTA: f32 = 2.0;
 const I_BUFF: usize = 1024;
