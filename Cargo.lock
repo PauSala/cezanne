@@ -45,19 +45,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "96d30a06541fbafbc7f82ed10c06164cfbd2c401138f6addd8404629c4b16711"
 
 [[package]]
-name = "audio-paint"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "colorgrad",
- "cpal",
- "hound",
- "minifb",
- "rodio",
- "rustfft",
-]
-
-[[package]]
 name = "autocfg"
 version = "1.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -143,6 +130,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6fac387a98bb7c37292057cffc56d62ecb629900026402633ae9160df93a8766"
 dependencies = [
  "nom",
+]
+
+[[package]]
+name = "cezanne"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "colorgrad",
+ "cpal",
+ "hound",
+ "minifb",
+ "rodio",
+ "rustfft",
 ]
 
 [[package]]

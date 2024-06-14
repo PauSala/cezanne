@@ -1,6 +1,8 @@
 use std::sync::{Arc, Mutex};
 
 use crate::{FF_BUFF, MARGIN, SCALE_FACTOR};
+const AA_SQRT: usize = 4;
+const AA_PIXEL_SIZE: usize = AA_SQRT.pow(2);
 
 pub struct Visualizer {
     width: usize,
@@ -27,7 +29,6 @@ impl Visualizer {
     pub fn classify_circles(width: usize, height: usize) -> Vec<usize> {
         let circles = FF_BUFF;
         let max_radius = (width.min(height) / 2) - MARGIN;
-        dbg!(max_radius);
         let radius_step = max_radius / circles;
 
         let mut all_circles: Vec<usize> = Vec::new();
@@ -67,7 +68,6 @@ impl Visualizer {
         elapsed_milis: f64,
     ) -> Option<()> {
         let ff = freqs.lock().unwrap();
-
         if ff.len() < 1 {
             return None;
         }
@@ -126,25 +126,27 @@ impl Visualizer {
     }
 
     fn downscale(&self, buffer: &[u32], window_buffer: &mut Vec<u32>) {
+        let length = buffer.len() as f64;
+        let width = length.sqrt() as usize;
+        let mut colors = [0; AA_PIXEL_SIZE];
+        // Static array for colors
+
         for r in 0..self.width {
             for c in 0..self.height {
-                let mut colors = Vec::new();
-                // Take average of 8 pixels
-                for dy in 0..4 {
-                    for dx in 0..4 {
+                let mut idx = 0;
+                for dy in 0..AA_SQRT {
+                    for dx in 0..AA_SQRT {
                         let orig_row = r * self.scale_factor + dx;
                         let orig_col = c * self.scale_factor + dy;
-                        let length = buffer.len() as f64;
-                        let width = length.sqrt() as usize;
                         let orig_index = orig_row * width + orig_col;
-                        if orig_index >= buffer.len() {
-                            continue;
+                        if orig_index < buffer.len() {
+                            // Some indices are out of scope, just ignore them
+                            colors[idx] = buffer[orig_index];
                         }
-                        let c = buffer[orig_index].clone();
-                        colors.push(c);
+                        idx += 1;
                     }
                 }
-                window_buffer[r * self.width + c] = self.average_colors(colors.as_slice());
+                window_buffer[r * self.width + c] = self.average_colors(&colors);
             }
         }
     }
