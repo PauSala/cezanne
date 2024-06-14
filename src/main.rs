@@ -19,8 +19,8 @@ const MARGIN: usize = 8;
 const WIDTH: usize = 512 + 2 * MARGIN;
 const HEIGHT: usize = WIDTH;
 const DELTA: f32 = 2.0;
-const I_BUFF: usize = 2048;
-const FF_BUFF: usize = 256;
+const I_BUFF: usize = 1024;
+const FF_BUFF: usize = 128;
 const SCALE_FACTOR: usize = 2;
 
 fn main() -> Result<()> {
@@ -67,8 +67,9 @@ fn main() -> Result<()> {
 
         //Get visualiation buffer
         let ob_clone = Arc::clone(&ob);
-        let b = visualizer.get_live_buffer(&mut db, &mut wb, &mut scaled_b, ob_clone, millis);
-        if let Some(_) = b {
+        if let Some(_) =
+            visualizer.update_window_buffer(&mut db, &mut wb, &mut scaled_b, ob_clone, millis)
+        {
             window.update_with_buffer(&wb, WIDTH, HEIGHT).unwrap();
         }
         start = end;

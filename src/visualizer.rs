@@ -58,7 +58,7 @@ impl Visualizer {
         res
     }
 
-    pub fn get_live_buffer(
+    pub fn update_window_buffer(
         &self,
         prev_buffer: &mut Vec<f32>,
         window_buffer: &mut Vec<u32>,
@@ -129,6 +129,7 @@ impl Visualizer {
         for r in 0..self.width {
             for c in 0..self.height {
                 let mut colors = Vec::new();
+                // Take average of 8 pixels
                 for dy in 0..4 {
                     for dx in 0..4 {
                         let orig_row = r * self.scale_factor + dx;
