@@ -56,11 +56,10 @@ fn normalize_freqs(freqs: &mut Vec<f32>) {
     let mut max = f32::MIN;
 
     // Apply a logarithmic function to compress the range
-    // for row in freqs.iter_mut() {
-    //     for value in row.iter_mut() {
-    //         *value = (*value + 1.0).ln();
-    //     }
+    // for value in freqs.iter_mut() {
+    //     *value = (*value + 1.0).ln();
     // }
+
     for &value in freqs.iter() {
         if value > max {
             max = value;

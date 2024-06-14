@@ -19,3 +19,8 @@ rand = "0.8.5"
 [[bench]]
 name = "mainbench"
 harness = false
+
+[profile.release]
+opt-level = 3     # Optimization level (0-3, with 3 being the highest)
+codegen-units = 1 # Number of parallel codegen units
+lto = true        # Enable Link-Time Optimization
