@@ -15,11 +15,12 @@ pub mod input_stream;
 pub mod output_stream;
 pub mod visualizer;
 
-const WIDTH: usize = 512;
+const MARGIN: usize = 8;
+const WIDTH: usize = 512 + 2 * MARGIN;
 const HEIGHT: usize = WIDTH;
 const DELTA: f32 = 2.0;
-const I_BUFF: usize = 1024;
-const FF_BUFF: usize = 128;
+const I_BUFF: usize = 2048;
+const FF_BUFF: usize = 256;
 const SCALE_FACTOR: usize = 2;
 
 fn main() -> Result<()> {
@@ -27,20 +28,20 @@ fn main() -> Result<()> {
     let channels = config.channels();
 
     // Input buffer (samples)
-    let i_buffer = Arc::new(Mutex::new(Vec::new()));
-    let i_buffer_clone = Arc::clone(&i_buffer);
+    let ib = Arc::new(Mutex::new(Vec::new()));
+    let ib_clone = Arc::clone(&ib);
 
     // Setup input stream
-    let stream = AudioInput::new(i_buffer_clone, device, &config)?;
+    let stream = AudioInput::new(ib_clone, device, &config)?;
     stream.play()?;
 
     //Output buffer (frequencies)
-    let i_buffer_clone = Arc::clone(&i_buffer);
-    let o_buffer = Arc::new(Mutex::new(Vec::new()));
-    let o_buffer_clone = Arc::clone(&o_buffer);
+    let ob = Arc::new(Mutex::new(Vec::new()));
+    let ob_clone = Arc::clone(&ob);
 
     //Setup output stream
-    init_output_stream(i_buffer_clone, o_buffer_clone, channels);
+    let ib_clone = Arc::clone(&ib);
+    init_output_stream(ib_clone, ob_clone, channels);
 
     let mut window = Window::new(
         "Frequency Spectrum",
@@ -53,22 +54,23 @@ fn main() -> Result<()> {
     let visualizer = Visualizer::new(WIDTH, HEIGHT, SCALE_FACTOR, DELTA);
     window.set_target_fps(30);
     let mut start = SystemTime::now();
-    let mut curr = vec![0.0; FF_BUFF];
+    let mut db = vec![0.0; FF_BUFF];
+    let mut wb = vec![0; WIDTH * HEIGHT];
+    let mut scaled_b = vec![0; WIDTH * SCALE_FACTOR * HEIGHT * SCALE_FACTOR];
 
     while window.is_open() && !window.is_key_down(Key::Escape) {
         let end = SystemTime::now();
         let elapsed = end.duration_since(start).unwrap();
-        // println!("Elapsed: {:?}", elapsed.as_millis());
+        // println!("Elapsed: {:?}ms", elapsed.as_millis());
         // precission issues
         let millis = elapsed.as_nanos() as f64 / 1_000_000.0;
 
         //Get visualiation buffer
-        let shrd_ff_cln = Arc::clone(&o_buffer);
-        let b = visualizer.get_live_buffer(&mut curr, shrd_ff_cln, millis);
-        if let Some(b) = b {
-            window.update_with_buffer(&b, WIDTH, HEIGHT).unwrap();
+        let ob_clone = Arc::clone(&ob);
+        let b = visualizer.get_live_buffer(&mut db, &mut wb, &mut scaled_b, ob_clone, millis);
+        if let Some(_) = b {
+            window.update_with_buffer(&wb, WIDTH, HEIGHT).unwrap();
         }
-
         start = end;
     }
     Ok(())

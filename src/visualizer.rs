@@ -1,6 +1,6 @@
 use std::sync::{Arc, Mutex};
 
-use crate::{FF_BUFF, SCALE_FACTOR};
+use crate::{FF_BUFF, MARGIN, SCALE_FACTOR};
 
 pub struct Visualizer {
     width: usize,
@@ -26,7 +26,8 @@ impl Visualizer {
 
     pub fn classify_circles(width: usize, height: usize) -> Vec<usize> {
         let circles = FF_BUFF;
-        let max_radius = (width.min(height) / 2) - 1;
+        let max_radius = (width.min(height) / 2) - MARGIN;
+        dbg!(max_radius);
         let radius_step = max_radius / circles;
 
         let mut all_circles: Vec<usize> = Vec::new();
@@ -60,9 +61,11 @@ impl Visualizer {
     pub fn get_live_buffer(
         &self,
         prev_buffer: &mut Vec<f32>,
+        window_buffer: &mut Vec<u32>,
+        scaled_buffer: &mut Vec<u32>,
         freqs: Arc<Mutex<Vec<f32>>>,
         elapsed_milis: f64,
-    ) -> Option<Vec<u32>> {
+    ) -> Option<()> {
         let ff = freqs.lock().unwrap();
 
         if ff.len() < 1 {
@@ -72,13 +75,17 @@ impl Visualizer {
             prev_buffer[i] +=
                 (ff[i] - prev_buffer[i]) as f32 * (elapsed_milis / 1000.0) as f32 * self.delta;
         }
-        return Some(self.draw_circles(&prev_buffer, &self.colors));
+        self.draw_circles(&prev_buffer, window_buffer, scaled_buffer, &self.colors);
+        Some(())
     }
 
-    fn draw_circles(&self, freqs: &[f32], colors: &Vec<u32>) -> Vec<u32> {
-        let mut buffer: Vec<u32> =
-            vec![0x000000; self.width * SCALE_FACTOR * self.height * SCALE_FACTOR];
-
+    fn draw_circles(
+        &self,
+        freqs: &[f32],
+        window_buffer: &mut Vec<u32>,
+        scaled_buffer: &mut Vec<u32>,
+        colors: &Vec<u32>,
+    ) {
         // Map each frequency to its corresponding color
         let color_map: Vec<u32> = freqs
             .iter()
@@ -92,11 +99,11 @@ impl Visualizer {
         // Use the precomputed circle classification to set buffer colors
         for (i, &circle_index) in self.circles.iter().enumerate() {
             if circle_index < color_map.len() {
-                buffer[i] = color_map[circle_index];
+                scaled_buffer[i] = color_map[circle_index];
             }
         }
 
-        self.downscale(&buffer)
+        self.downscale(&scaled_buffer, window_buffer);
     }
 
     fn average_colors(&self, colors: &[u32]) -> u32 {
@@ -118,9 +125,7 @@ impl Visualizer {
         (avg_r << 16) | (avg_g << 8) | avg_b
     }
 
-    fn downscale(&self, buffer: &[u32]) -> Vec<u32> {
-        let mut new_buffer = vec![0xFFFFFF; self.width * self.height];
-
+    fn downscale(&self, buffer: &[u32], window_buffer: &mut Vec<u32>) {
         for r in 0..self.width {
             for c in 0..self.height {
                 let mut colors = Vec::new();
@@ -138,10 +143,9 @@ impl Visualizer {
                         colors.push(c);
                     }
                 }
-                new_buffer[r * self.width + c] = self.average_colors(colors.as_slice());
+                window_buffer[r * self.width + c] = self.average_colors(colors.as_slice());
             }
         }
-        new_buffer
     }
 
     fn gradient(len: usize) -> Vec<u32> {
