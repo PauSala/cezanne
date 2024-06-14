@@ -15,7 +15,7 @@ pub mod input_stream;
 pub mod output_stream;
 pub mod visualizer;
 
-const WIDTH: usize = 1024;
+const WIDTH: usize = 512;
 const HEIGHT: usize = WIDTH;
 const DELTA: f32 = 2.0;
 const BUF_LEN: usize = 1024;
@@ -44,8 +44,8 @@ fn main() -> Result<()> {
 
     let mut window = Window::new(
         "Frequency Spectrum",
-        WIDTH / SCALE_FACTOR,
-        HEIGHT / SCALE_FACTOR,
+        WIDTH,
+        HEIGHT,
         WindowOptions::default(),
     )
     .unwrap();
@@ -66,9 +66,7 @@ fn main() -> Result<()> {
         let shrd_ff_cln = Arc::clone(&o_buffer);
         let b = visualizer.get_live_buffer(&mut curr, shrd_ff_cln, millis);
         if let Some(b) = b {
-            window
-                .update_with_buffer(&b, WIDTH / SCALE_FACTOR, HEIGHT / SCALE_FACTOR)
-                .unwrap();
+            window.update_with_buffer(&b, WIDTH, HEIGHT).unwrap();
         }
 
         start = end;

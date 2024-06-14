@@ -1,6 +1,6 @@
 use std::sync::{Arc, Mutex};
 
-use crate::DB_LEN;
+use crate::{DB_LEN, SCALE_FACTOR};
 
 pub struct Visualizer {
     width: usize,
@@ -20,7 +20,7 @@ impl Visualizer {
             scale_factor,
             delta,
             colors,
-            circles: Visualizer::classify_circles(width, height),
+            circles: Visualizer::classify_circles(width * SCALE_FACTOR, height * SCALE_FACTOR),
         }
     }
 
@@ -76,7 +76,8 @@ impl Visualizer {
     }
 
     fn draw_circles(&self, freqs: &[f32], colors: &Vec<u32>) -> Vec<u32> {
-        let mut buffer: Vec<u32> = vec![0x000000; self.width * self.height];
+        let mut buffer: Vec<u32> =
+            vec![0x000000; self.width * SCALE_FACTOR * self.height * SCALE_FACTOR];
 
         // Map each frequency to its corresponding color
         let color_map: Vec<u32> = freqs
@@ -118,11 +119,10 @@ impl Visualizer {
     }
 
     fn downscale(&self, buffer: &[u32]) -> Vec<u32> {
-        let mut new_buffer =
-            vec![0xFFFFFF; self.width * self.height / (self.scale_factor * self.scale_factor)];
+        let mut new_buffer = vec![0xFFFFFF; self.width * self.height];
 
-        for r in 0..self.width / self.scale_factor {
-            for c in 0..self.height / self.scale_factor {
+        for r in 0..self.width {
+            for c in 0..self.height {
                 let mut colors = Vec::new();
                 for dy in 0..4 {
                     for dx in 0..4 {
@@ -138,8 +138,7 @@ impl Visualizer {
                         colors.push(c);
                     }
                 }
-                new_buffer[r * self.width / self.scale_factor + c] =
-                    self.average_colors(colors.as_slice());
+                new_buffer[r * self.width + c] = self.average_colors(colors.as_slice());
             }
         }
         new_buffer
