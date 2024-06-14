@@ -16,7 +16,7 @@ pub mod output_stream;
 pub mod visualizer;
 
 const MARGIN: usize = 8;
-const WIDTH: usize = 512 + 2 * MARGIN;
+const WIDTH: usize = 1024 + 2 * MARGIN;
 const HEIGHT: usize = WIDTH;
 const DELTA: f32 = 2.0;
 const I_BUFF: usize = 1024;
@@ -54,8 +54,8 @@ fn main() -> Result<()> {
     let visualizer = Visualizer::new(WIDTH, HEIGHT, SCALE_FACTOR, DELTA);
     window.set_target_fps(30);
     let mut start = SystemTime::now();
-    let mut db = vec![0.0; FF_BUFF];
-    let mut wb = vec![0; WIDTH * HEIGHT];
+    let mut db = [0.0; FF_BUFF];
+    let mut wb = [0; WIDTH * HEIGHT];
     let mut scaled_b = vec![0; WIDTH * SCALE_FACTOR * HEIGHT * SCALE_FACTOR];
 
     while window.is_open() && !window.is_key_down(Key::Escape) {
@@ -67,11 +67,11 @@ fn main() -> Result<()> {
 
         //Get visualiation buffer
         let ob_clone = Arc::clone(&ob);
-        //let xstart = SystemTime::now();
+        // let xstart = SystemTime::now();
         let b = visualizer.update_window_buffer(&mut db, &mut wb, &mut scaled_b, ob_clone, millis);
-        //let xend = SystemTime::now();
-        //let elapsed = xend.duration_since(xstart).unwrap();
-        //println!("Elapsed: {:?}ms", elapsed.as_nanos() as f64 / 1_000_000.0);
+        // let xend = SystemTime::now();
+        // let elapsed = xend.duration_since(xstart).unwrap();
+        // println!("Elapsed: {:?}ms", elapsed.as_nanos() as f64 / 1_000_000.0);
         if let Some(_) = b {
             window.update_with_buffer(&wb, WIDTH, HEIGHT).unwrap();
         }

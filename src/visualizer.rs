@@ -1,6 +1,6 @@
 use std::sync::{Arc, Mutex};
 
-use crate::{FF_BUFF, I_BUFF, MARGIN, SCALE_FACTOR};
+use crate::{FF_BUFF, HEIGHT, I_BUFF, MARGIN, SCALE_FACTOR, WIDTH};
 const AA_SQRT: usize = 4;
 const AA_PIXEL_SIZE: usize = AA_SQRT.pow(2);
 
@@ -61,8 +61,8 @@ impl Visualizer {
 
     pub fn update_window_buffer(
         &self,
-        prev_buffer: &mut Vec<f32>,
-        window_buffer: &mut Vec<u32>,
+        prev_buffer: &mut [f32; FF_BUFF],
+        window_buffer: &mut [u32; WIDTH * HEIGHT],
         scaled_buffer: &mut Vec<u32>,
         freqs: Arc<Mutex<[f32; I_BUFF / 2]>>,
         elapsed_milis: f64,
@@ -81,8 +81,8 @@ impl Visualizer {
 
     fn draw_circles(
         &self,
-        freqs: &[f32],
-        window_buffer: &mut Vec<u32>,
+        freqs: &[f32; FF_BUFF],
+        window_buffer: &mut [u32; WIDTH * HEIGHT],
         scaled_buffer: &mut Vec<u32>,
         colors: &Vec<u32>,
     ) {
@@ -125,7 +125,7 @@ impl Visualizer {
         (avg_r << 16) | (avg_g << 8) | avg_b
     }
 
-    fn downscale(&self, buffer: &[u32], window_buffer: &mut Vec<u32>) {
+    fn downscale(&self, buffer: &[u32], window_buffer: &mut [u32; WIDTH * HEIGHT]) {
         let length = buffer.len() as f64;
         let width = length.sqrt() as usize;
         let mut colors = [0; AA_PIXEL_SIZE];
