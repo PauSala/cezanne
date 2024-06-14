@@ -1,28 +1,20 @@
 use std::sync::{Arc, Mutex};
 
-use crate::{FF_BUFF, HEIGHT, I_BUFF, MARGIN, SCALE_FACTOR, WIDTH};
+use crate::{DELTA, FF_BUFF, HEIGHT, I_BUFF, MARGIN, SCALE_FACTOR, WIDTH};
 const AA_SQRT: usize = 4;
 const AA_PIXEL_SIZE: usize = AA_SQRT.pow(2);
 
 pub struct Visualizer {
-    width: usize,
-    height: usize,
-    scale_factor: usize,
-    delta: f32,
     colors: Vec<u32>,
     circles: Vec<usize>,
 }
 
 impl Visualizer {
-    pub fn new(width: usize, height: usize, scale_factor: usize, delta: f32) -> Self {
+    pub fn new() -> Self {
         let colors = Visualizer::gradient(FF_BUFF);
         Self {
-            width,
-            height,
-            scale_factor,
-            delta,
             colors,
-            circles: Visualizer::classify_circles(width * SCALE_FACTOR, height * SCALE_FACTOR),
+            circles: Visualizer::classify_circles(WIDTH * SCALE_FACTOR, HEIGHT * SCALE_FACTOR),
         }
     }
 
@@ -73,7 +65,7 @@ impl Visualizer {
         }
         for i in 0..prev_buffer.len() {
             prev_buffer[i] +=
-                (ff[i] - prev_buffer[i]) as f32 * (elapsed_milis / 1000.0) as f32 * self.delta;
+                (ff[i] - prev_buffer[i]) as f32 * (elapsed_milis / 1000.0) as f32 * DELTA;
         }
         self.draw_circles(&prev_buffer, window_buffer, scaled_buffer, &self.colors);
         Some(())
@@ -131,13 +123,13 @@ impl Visualizer {
         let mut colors = [0; AA_PIXEL_SIZE];
         // Static array for colors
 
-        for r in 0..self.width {
-            for c in 0..self.height {
+        for r in 0..WIDTH {
+            for c in 0..HEIGHT {
                 let mut idx = 0;
                 for dy in 0..AA_SQRT {
                     for dx in 0..AA_SQRT {
-                        let orig_row = r * self.scale_factor + dx;
-                        let orig_col = c * self.scale_factor + dy;
+                        let orig_row = r * SCALE_FACTOR + dx;
+                        let orig_col = c * SCALE_FACTOR + dy;
                         let orig_index = orig_row * width + orig_col;
                         if orig_index < buffer.len() {
                             // Some indices are out of scope, just ignore them
@@ -146,7 +138,7 @@ impl Visualizer {
                         idx += 1;
                     }
                 }
-                window_buffer[r * self.width + c] = self.average_colors(&colors);
+                window_buffer[r * WIDTH + c] = self.average_colors(&colors);
             }
         }
     }

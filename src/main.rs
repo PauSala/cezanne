@@ -1,3 +1,8 @@
+pub mod analizer;
+pub mod input_stream;
+pub mod output_stream;
+pub mod visualizer;
+
 use std::{
     sync::{Arc, Mutex},
     time::SystemTime,
@@ -9,11 +14,6 @@ use input_stream::{device, AudioInput};
 use minifb::{Key, Window, WindowOptions};
 use output_stream::init_output_stream;
 use visualizer::Visualizer;
-
-pub mod analizer;
-pub mod input_stream;
-pub mod output_stream;
-pub mod visualizer;
 
 const MARGIN: usize = 8;
 const WIDTH: usize = 512 + 2 * MARGIN;
@@ -51,7 +51,7 @@ fn main() -> Result<()> {
     )
     .unwrap();
 
-    let visualizer = Visualizer::new(WIDTH, HEIGHT, SCALE_FACTOR, DELTA);
+    let visualizer = Visualizer::new();
     window.set_target_fps(30);
     let mut start = SystemTime::now();
     let mut db = [0.0; FF_BUFF];
