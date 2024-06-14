@@ -18,16 +18,16 @@ impl Visualizer {
         }
     }
 
+    /// Precomputes at which circle belongs every pixel in an upscaled buffer
     pub fn classify_circles(width: usize, height: usize) -> Vec<usize> {
         let circles = FF_BUFF;
         let max_radius = (width.min(height) / 2) - MARGIN;
         let radius_step = max_radius / circles;
 
-        let mut all_circles: Vec<usize> = Vec::new();
-
+        let mut all_circles = [0; FF_BUFF];
         for i in 0..FF_BUFF {
             let radius = (circles - i) * radius_step;
-            all_circles.push(radius);
+            all_circles[i] = radius;
         }
 
         let mut res: Vec<usize> = vec![FF_BUFF; width * height];
@@ -71,6 +71,7 @@ impl Visualizer {
         Some(())
     }
 
+    /// Draws circles based on precomputations in the upscaled buffer
     fn draw_circles(
         &self,
         freqs: &[f32; FF_BUFF],
@@ -117,11 +118,11 @@ impl Visualizer {
         (avg_r << 16) | (avg_g << 8) | avg_b
     }
 
+    /// Downscale for Supersampling Antialiasing (SSAA)
     fn downscale(&self, buffer: &[u32], window_buffer: &mut [u32; WIDTH * HEIGHT]) {
         let length = buffer.len() as f64;
         let width = length.sqrt() as usize;
         let mut colors = [0; AA_PIXEL_SIZE];
-        // Static array for colors
 
         for r in 0..WIDTH {
             for c in 0..HEIGHT {
