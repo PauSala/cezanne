@@ -3,7 +3,7 @@ use std::{
     thread,
 };
 
-use crate::{analizer::frequencies, BUF_LEN};
+use crate::{analizer::frequencies, I_BUFF};
 
 pub fn init_output_stream(
     input_buffer: Arc<Mutex<Vec<f32>>>,
@@ -20,7 +20,7 @@ pub fn init_output_stream(
             }
         };
         if let Some(buffer) = buffer {
-            if buffer.len() >= BUF_LEN {
+            if buffer.len() >= I_BUFF {
                 let ff = frequencies(&buffer, channels);
                 let lock = output_buffer.lock();
                 match lock {

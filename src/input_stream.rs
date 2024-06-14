@@ -7,7 +7,7 @@ use cpal::{
 };
 use rodio::DeviceTrait;
 
-use crate::BUF_LEN;
+use crate::I_BUFF;
 
 pub fn device() -> Result<(Device, SupportedStreamConfig)> {
     let host = cpal::default_host();
@@ -40,7 +40,7 @@ impl AudioInput {
             SampleFormat::F32 => {
                 let callback = move |data: &[f32], _: &InputCallbackInfo| {
                     let mut buffer = shared_buffer_clone.lock().unwrap();
-                    if buffer.len() >= BUF_LEN {
+                    if buffer.len() >= I_BUFF {
                         buffer.clear();
                     }
                     buffer.extend_from_slice(data);

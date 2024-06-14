@@ -1,6 +1,6 @@
 use std::sync::{Arc, Mutex};
 
-use crate::{DB_LEN, SCALE_FACTOR};
+use crate::{FF_BUFF, SCALE_FACTOR};
 
 pub struct Visualizer {
     width: usize,
@@ -13,7 +13,7 @@ pub struct Visualizer {
 
 impl Visualizer {
     pub fn new(width: usize, height: usize, scale_factor: usize, delta: f32) -> Self {
-        let colors = Visualizer::gradient(DB_LEN);
+        let colors = Visualizer::gradient(FF_BUFF);
         Self {
             width,
             height,
@@ -25,18 +25,18 @@ impl Visualizer {
     }
 
     pub fn classify_circles(width: usize, height: usize) -> Vec<usize> {
-        let circles = DB_LEN;
+        let circles = FF_BUFF;
         let max_radius = (width.min(height) / 2) - 1;
         let radius_step = max_radius / circles;
 
         let mut all_circles: Vec<usize> = Vec::new();
 
-        for i in 0..DB_LEN {
+        for i in 0..FF_BUFF {
             let radius = (circles - i) * radius_step;
             all_circles.push(radius);
         }
 
-        let mut res: Vec<usize> = vec![DB_LEN; width * height];
+        let mut res: Vec<usize> = vec![FF_BUFF; width * height];
 
         let cx = width / 2;
         let cy = height / 2;

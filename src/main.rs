@@ -18,8 +18,8 @@ pub mod visualizer;
 const WIDTH: usize = 512;
 const HEIGHT: usize = WIDTH;
 const DELTA: f32 = 2.0;
-const BUF_LEN: usize = 1024;
-const DB_LEN: usize = 128;
+const I_BUFF: usize = 1024;
+const FF_BUFF: usize = 128;
 const SCALE_FACTOR: usize = 2;
 
 fn main() -> Result<()> {
@@ -53,7 +53,7 @@ fn main() -> Result<()> {
     let visualizer = Visualizer::new(WIDTH, HEIGHT, SCALE_FACTOR, DELTA);
     window.set_target_fps(30);
     let mut start = SystemTime::now();
-    let mut curr = vec![0.0; DB_LEN];
+    let mut curr = vec![0.0; FF_BUFF];
 
     while window.is_open() && !window.is_key_down(Key::Escape) {
         let end = SystemTime::now();
