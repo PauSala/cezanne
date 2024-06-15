@@ -2,10 +2,9 @@ use anyhow::Result;
 use std::sync::{Arc, Condvar, Mutex};
 
 use cpal::{
-    traits::{HostTrait, StreamTrait},
+    traits::{DeviceTrait, HostTrait, StreamTrait},
     Device, InputCallbackInfo, SampleFormat, StreamConfig, SupportedStreamConfig,
 };
-use rodio::DeviceTrait;
 
 use crate::I_BUFF;
 
