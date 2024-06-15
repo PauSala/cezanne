@@ -1,5 +1,8 @@
 use std::{
-    sync::{Arc, Condvar, Mutex},
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc, Condvar, Mutex,
+    },
     thread,
 };
 
@@ -9,12 +12,12 @@ pub fn init_output_stream(
     input_buffer: Arc<(Mutex<Vec<f32>>, Condvar)>,
     output_buffer: Arc<Mutex<[f32; I_BUFF / 2]>>,
     channels: u16,
-    terminate: Arc<Mutex<bool>>,
+    terminate: Arc<AtomicBool>,
 ) -> thread::JoinHandle<()> {
     let join_handle = thread::spawn(move || loop {
         {
-            let should_terminate = terminate.lock().unwrap();
-            if *should_terminate {
+            if terminate.load(Ordering::Relaxed) {
+                dbg!("Exiting thread gracefully");
                 break;
             }
         }

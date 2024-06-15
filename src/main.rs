@@ -1,7 +1,9 @@
 use std::{
-    sync::{Arc, Condvar, Mutex},
-    thread,
-    time::{Duration, SystemTime},
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc, Condvar, Mutex,
+    },
+    time::SystemTime,
 };
 
 use anyhow::Result;
@@ -12,7 +14,7 @@ use cezanne::{
     visualizer::Visualizer,
     FF_BUFF, HEIGHT, I_BUFF, SCALE_FACTOR, WIDTH,
 };
-use minifb::{HasWindowHandle, Key, Window, WindowOptions};
+use minifb::{Key, Window, WindowOptions};
 
 fn main() -> Result<()> {
     let (device, config) = device()?;
@@ -31,10 +33,10 @@ fn main() -> Result<()> {
     let ob_clone = Arc::clone(&ob);
 
     //Setup output stream
-    let terminate_flag = Arc::new(Mutex::new(false));
-    let terminate_flag_clone = Arc::clone(&terminate_flag);
+    let stop = Arc::new(AtomicBool::new(false));
+    let stop_clone = stop.clone();
     let ib_clone = Arc::clone(&ib);
-    let thread_handle = init_output_stream(ib_clone, ob_clone, channels, terminate_flag_clone);
+    let thread_handle = init_output_stream(ib_clone, ob_clone, channels, stop_clone);
 
     let mut window = Window::new(
         "Frequency Spectrum",
@@ -68,8 +70,7 @@ fn main() -> Result<()> {
 
     // Set termination flag to signal thread to return
     {
-        let mut should_terminate = terminate_flag.lock().unwrap();
-        *should_terminate = true;
+        stop.store(true, Ordering::SeqCst);
     }
     let _ = thread_handle.join();
     drop(window);
