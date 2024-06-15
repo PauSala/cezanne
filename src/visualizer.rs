@@ -24,10 +24,11 @@ impl Visualizer {
         let max_radius = (width.min(height) / 2) - MARGIN;
         let radius_step = max_radius / circles;
 
-        let mut all_circles = [0; FF_BUFF];
+        let mut frequencies = [0; FF_BUFF];
+        // Frequencies from low to high
         for i in 0..FF_BUFF {
             let radius = (circles - i) * radius_step;
-            all_circles[i] = radius;
+            frequencies[i] = radius;
         }
 
         let mut res: Vec<usize> = vec![FF_BUFF; width * height];
@@ -40,8 +41,9 @@ impl Visualizer {
                 let dy = y as isize - cy as isize;
                 let dist_sq = dx * dx + dy * dy;
                 let index = y * width + x;
-                for (i, circle) in all_circles.iter().rev().enumerate() {
-                    if dist_sq <= (circle * circle) as isize {
+                // Reverse to put lowest at the center and higher at outer circle
+                for (i, radius) in frequencies.iter().rev().enumerate() {
+                    if dist_sq <= (radius * radius) as isize {
                         res[index] = i;
                         break;
                     }
@@ -79,7 +81,7 @@ impl Visualizer {
         scaled_buffer: &mut Vec<u32>,
         colors: &Vec<u32>,
     ) {
-        // Map each frequency to its corresponding color
+        // Color_map contains colors corresponding to frequencies [low -> high]
         let color_map: Vec<u32> = freqs
             .iter()
             .map(|&sample| {
@@ -90,9 +92,13 @@ impl Visualizer {
             .collect();
 
         // Use the precomputed circle classification to set buffer colors
-        for (i, &circle_index) in self.circles.iter().enumerate() {
-            if circle_index < color_map.len() {
-                scaled_buffer[i] = color_map[circle_index];
+        // i is the pixel index
+        // freq_index is the frequency index
+        for (i, &freq_index) in self.circles.iter().enumerate() {
+            println!("Index {}", i);
+            if freq_index < color_map.len() {
+                // pixel i = the color corresponding to frequency at freq_index
+                scaled_buffer[i] = color_map[freq_index];
             }
         }
 

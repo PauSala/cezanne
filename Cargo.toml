@@ -17,7 +17,11 @@ criterion = "0.3"
 rand = "0.8.5"
 
 [[bench]]
-name = "mainbench"
+name = "analizer"
+harness = false
+
+[[bench]]
+name = "visualizer"
 harness = false
 
 [profile.release]

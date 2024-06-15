@@ -1,7 +1,6 @@
 use cezanne::analizer::frequencies;
-use criterion::{criterion_group, criterion_main, Criterion};
+use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
-// Prepare benchmark data
 fn generate_samples(num_samples: usize) -> Vec<f32> {
     // Example: Generate random samples for benchmarking
     use rand::Rng;
@@ -14,7 +13,7 @@ pub fn criterion_benchmark(c: &mut Criterion) {
     let samples = generate_samples(1000); // Generate 1000 samples for benchmarking
     let channels = 2; // Example: Number of channels
     c.bench_function("frequencies", |b| {
-        b.iter(|| frequencies(&samples, channels))
+        b.iter(|| frequencies(black_box(&samples), black_box(channels)))
     });
 }
 
