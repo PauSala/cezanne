@@ -59,4 +59,9 @@ impl AudioInput {
         self.stream.play()?;
         Ok(())
     }
+
+    pub fn pause(&self) -> Result<()> {
+        self.stream.pause()?;
+        Ok(())
+    }
 }

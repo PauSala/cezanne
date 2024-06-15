@@ -1,6 +1,7 @@
 use std::{
     sync::{Arc, Condvar, Mutex},
-    time::SystemTime,
+    thread,
+    time::{Duration, SystemTime},
 };
 
 use anyhow::Result;
@@ -11,7 +12,7 @@ use cezanne::{
     visualizer::Visualizer,
     FF_BUFF, HEIGHT, I_BUFF, SCALE_FACTOR, WIDTH,
 };
-use minifb::{Key, Window, WindowOptions};
+use minifb::{HasWindowHandle, Key, Window, WindowOptions};
 
 fn main() -> Result<()> {
     let (device, config) = device()?;
@@ -30,8 +31,10 @@ fn main() -> Result<()> {
     let ob_clone = Arc::clone(&ob);
 
     //Setup output stream
+    let terminate_flag = Arc::new(Mutex::new(false));
+    let terminate_flag_clone = Arc::clone(&terminate_flag);
     let ib_clone = Arc::clone(&ib);
-    init_output_stream(ib_clone, ob_clone, channels);
+    let thread_handle = init_output_stream(ib_clone, ob_clone, channels, terminate_flag_clone);
 
     let mut window = Window::new(
         "Frequency Spectrum",
@@ -62,5 +65,15 @@ fn main() -> Result<()> {
         }
         start = end;
     }
+
+    // Set termination flag to signal thread to return
+    {
+        let mut should_terminate = terminate_flag.lock().unwrap();
+        *should_terminate = true;
+    }
+    let _ = thread_handle.join();
+    drop(window);
+    stream.pause()?;
+    drop(stream);
     Ok(())
 }
