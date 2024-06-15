@@ -90,12 +90,10 @@ impl Visualizer {
                 colors[color_index]
             })
             .collect();
-
         // Use the precomputed circle classification to set buffer colors
         // i is the pixel index
         // freq_index is the frequency index
         for (i, &freq_index) in self.circles.iter().enumerate() {
-            println!("Index {}", i);
             if freq_index < color_map.len() {
                 // pixel i = the color corresponding to frequency at freq_index
                 scaled_buffer[i] = color_map[freq_index];
@@ -103,25 +101,6 @@ impl Visualizer {
         }
 
         self.downscale(&scaled_buffer, window_buffer);
-    }
-
-    fn average_colors(&self, colors: &[u32]) -> u32 {
-        let mut sum_r = 0u32;
-        let mut sum_g = 0u32;
-        let mut sum_b = 0u32;
-        let count = colors.len() as u32;
-
-        for &color in colors {
-            sum_r += (color >> 16) & 0xFF;
-            sum_g += (color >> 8) & 0xFF;
-            sum_b += color & 0xFF;
-        }
-
-        let avg_r = sum_r / count;
-        let avg_g = sum_g / count;
-        let avg_b = sum_b / count;
-
-        (avg_r << 16) | (avg_g << 8) | avg_b
     }
 
     /// Downscale for Supersampling Antialiasing (SSAA)
@@ -148,6 +127,25 @@ impl Visualizer {
                 window_buffer[r * WIDTH + c] = self.average_colors(&colors);
             }
         }
+    }
+
+    fn average_colors(&self, colors: &[u32]) -> u32 {
+        let mut sum_r = 0u32;
+        let mut sum_g = 0u32;
+        let mut sum_b = 0u32;
+        let count = colors.len() as u32;
+
+        for &color in colors {
+            sum_r += (color >> 16) & 0xFF;
+            sum_g += (color >> 8) & 0xFF;
+            sum_b += color & 0xFF;
+        }
+
+        let avg_r = sum_r / count;
+        let avg_g = sum_g / count;
+        let avg_b = sum_b / count;
+
+        (avg_r << 16) | (avg_g << 8) | avg_b
     }
 
     fn gradient(len: usize) -> Vec<u32> {
